@@ -1,0 +1,4 @@
+# reference from voltage divider (3x1Ohm, Vs=5V)
+N001 1.666667
+N002 3.333333
+N003 5.000000

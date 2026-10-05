@@ -1,0 +1,10 @@
+* Generated netlist
+V1 N001 0 5
+R1 N001 N002 1
+R2 N002 N003 1
+R3 N003 N004 1
+R4 N004 N005 1
+R5 N005 N006 1
+R6 N006 0 1
+.op
+.end

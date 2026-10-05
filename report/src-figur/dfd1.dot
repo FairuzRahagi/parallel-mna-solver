@@ -1,0 +1,30 @@
+digraph dfd1 {
+  rankdir=LR;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=8.5, color="#555555"];
+  nodesep=0.4; ranksep=0.7;
+
+  user  [shape=box style=filled fillcolor="#dbe7f5" label="Pengguna"];
+  spice [shape=box style=filled fillcolor="#dbe7f5" label="LTspice"];
+
+  p1 [shape=circle style=filled fillcolor="#fde9c8" width=1.25 fixedsize=true label="1\nBangun\nRangkaian"];
+  p2 [shape=circle style=filled fillcolor="#fde9c8" width=1.25 fixedsize=true label="2\nSusun\nMatriks MNA"];
+  p3 [shape=circle style=filled fillcolor="#fde9c8" width=1.35 fixedsize=true label="3\nSelesaikan\nSistem Linear"];
+  p4 [shape=circle style=filled fillcolor="#fde9c8" width=1.25 fixedsize=true label="4\nVerifikasi &\nLaporkan"];
+
+  d1 [shape=box style=filled fillcolor="#eeeeee" label="D1 | Kernel GPU (*.cl)"];
+  d2 [shape=box style=filled fillcolor="#eeeeee" label="D2 | results_openmp.csv"];
+  d3 [shape=box style=filled fillcolor="#eeeeee" label="D3 | Netlist *.net"];
+
+  user -> p1 [label="parameter N,\njenis rangkaian"];
+  p1 -> p2 [label="objek Circuit\n(komponen)"];
+  p2 -> p3 [label="matriks A, vektor b"];
+  p2 -> d3 [label="ekspor netlist" style=dashed];
+  d3 -> spice [style=dashed];
+  d1 -> p3 [label="sumber kernel" style=dashed];
+  p3 -> p4 [label="solusi x,\nwaktu solve"];
+  p4 -> user [label="x terverifikasi,\nspeedup"];
+  p4 -> d2 [label="baris hasil" style=dashed];
+  spice -> p4 [label="V referensi" style=dashed];
+}

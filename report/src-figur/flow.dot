@@ -1,0 +1,40 @@
+digraph flow {
+  rankdir=TB;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10, color="#333333"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+  nodesep=0.3; ranksep=0.38;
+
+  start  [shape=ellipse style=filled fillcolor="#dfeaf6" label="Mulai"];
+  build  [shape=box style="rounded,filled" fillcolor="white" label="Bangun Circuit & susun MNA\nmenghasilkan A, b berukuran n"];
+  initk  [shape=box style="rounded,filled" fillcolor="white" label="k = 0"];
+  loop   [shape=diamond style=filled fillcolor="#fff4e0" label="k < n - 1 ?"];
+
+  pivot  [shape=box style="rounded,filled" fillcolor="#eef4fb"
+          label="Cari pivot: baris dgn maks |A[i][k]|, i >= k\n(hanya jalur CPU; GPU melewati)"];
+  sing   [shape=diamond style=filled fillcolor="#fff4e0" label="|pivot| < 1e-14 ?"];
+  err    [shape=box style="rounded,filled" fillcolor="#fbe4e4" label="Matriks singular\nkembalikan galat"];
+  swap   [shape=box style="rounded,filled" fillcolor="#eef4fb" label="Tukar baris k <-> pivot_row\n(CPU)"];
+
+  elim   [shape=box style="rounded,filled" fillcolor="#e7f6ec" penwidth=2 color="#2ca02c"
+          label="ELIMINASI BARIS  i = k+1 .. n-1\nfactor = A[i][k]/A[k][k]; A[i][k]=factor\nA[i][j] -= factor*A[k][j]  (j = k+1..n-1)\n--- WILAYAH PARALEL ---\nSekuensial: loop biasa\nOpenMP: #pragma omp parallel for schedule(dynamic)\nOpenCL: kernel compute_factors (1D) + lu_eliminate (2D)"];
+  inck   [shape=box style="rounded,filled" fillcolor="white" label="k = k + 1"];
+
+  subst  [shape=box style="rounded,filled" fillcolor="white"
+          label="Substitusi maju (Ly=b) lalu mundur (Ux=y)\nmenghasilkan solusi x"];
+  resid  [shape=box style="rounded,filled" fillcolor="#f3eefb"
+          label="Cek residu  r = ||A x - b||inf\nverified = (r < 1e-6)"];
+  out    [shape=box style="rounded,filled" fillcolor="white" label="Keluarkan x, time_ms, verified"];
+  end    [shape=ellipse style=filled fillcolor="#dfeaf6" label="Selesai"];
+
+  start -> build -> initk -> loop;
+  loop -> pivot [label=" ya"];
+  pivot -> sing;
+  sing -> err [label=" ya"];
+  err -> end;
+  sing -> swap [label=" tidak"];
+  swap -> elim -> inck;
+  inck -> loop [label=" ulang" constraint=false];
+  loop -> subst [label=" tidak"];
+  subst -> resid -> out -> end;
+}

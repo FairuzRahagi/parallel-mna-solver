@@ -1,0 +1,17 @@
+digraph dfd0 {
+  rankdir=LR;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+  nodesep=0.5; ranksep=0.9;
+
+  user  [shape=box style=filled fillcolor="#dbe7f5" label="Pengguna"];
+  spice [shape=box style=filled fillcolor="#dbe7f5" label="LTspice\n(perangkat referensi)"];
+  proc  [shape=circle style=filled fillcolor="#fde9c8" width=1.7 fixedsize=true
+         label="0\nSistem Solver\nMNA Paralel"];
+
+  user -> proc [label="deskripsi rangkaian,\nparameter N, pilihan backend"];
+  proc -> user [label="tegangan node, arus cabang,\nlaporan waktu & speedup"];
+  proc -> spice [label="netlist *.net"];
+  spice -> proc [label="tegangan referensi\n(.op)"];
+}

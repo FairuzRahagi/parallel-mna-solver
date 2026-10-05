@@ -1,0 +1,19 @@
+# Build outputs
+*.exe
+*.o
+obj/
+solver
+benchmark
+test_mna
+generate_testcases
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+.vscode/
+.DS_Store
+Thumbs.db

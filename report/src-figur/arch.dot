@@ -1,0 +1,56 @@
+digraph arch {
+  rankdir=TB;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=11, color="#333333"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+  nodesep=0.35; ranksep=0.45;
+
+  subgraph cluster_in {
+    label="Lapisan Masukan"; fontname="Helvetica-Bold"; fontsize=11;
+    style="rounded,filled"; fillcolor="#eef4fb"; color="#9bbfe0";
+    builders [shape=box style="rounded,filled" fillcolor="white"
+      label="Pembangkit Rangkaian\nmakeLadder() · makeVoltageDivider()\nmakeSimpleLoop() · generateMesh()"];
+    netlist [shape=note style=filled fillcolor="white" label="Berkas netlist\n*.net (format LTspice)"];
+  }
+
+  subgraph cluster_model {
+    label="Lapisan Model"; fontname="Helvetica-Bold"; fontsize=11;
+    style="rounded,filled"; fillcolor="#eefbf2"; color="#8fd6a9";
+    circuit [shape=box style="rounded,filled" fillcolor="white"
+      label="Circuit\nresistor · sumber tegangan · sumber arus"];
+    mna [shape=box style="rounded,filled" fillcolor="white"
+      label="MNA::build()\nstamping G & cabang sumber tegangan\nmenghasilkan A x = b"];
+  }
+
+  subgraph cluster_solve {
+    label="Lapisan Komputasi (Solver)"; fontname="Helvetica-Bold"; fontsize=11;
+    style="rounded,filled"; fillcolor="#fbf3ec"; color="#e6b48f";
+    seq  [shape=box style="rounded,filled" fillcolor="white"
+      label="SequentialSolver\nLU + partial pivoting\n(1 inti CPU)"];
+    omp  [shape=box style="rounded,filled" fillcolor="white"
+      label="OpenMPSolver\nLU + pivoting; eliminasi\nparalel #pragma omp (multi-inti)"];
+    ocl  [shape=box style="rounded,filled" fillcolor="white"
+      label="OpenCLSolver\nLU tanpa pivoting (GPU)\n2 kernel per kolom-k"];
+    kern [shape=note style=filled fillcolor="white"
+      label="Kernel GPU\nlu_factor.cl · lu_eliminate.cl"];
+  }
+
+  subgraph cluster_out {
+    label="Lapisan Keluaran & Verifikasi"; fontname="Helvetica-Bold"; fontsize=11;
+    style="rounded,filled"; fillcolor="#f3eefb"; color="#b69bd6";
+    result [shape=box style="rounded,filled" fillcolor="white"
+      label="SolverResult\nx (tegangan node + arus cabang)\ntime_ms · verified"];
+    resid [shape=box style="rounded,filled" fillcolor="white"
+      label="Cek residu\n||A x - b||inf < 1e-6"];
+    csv [shape=note style=filled fillcolor="white" label="results_openmp.csv\n(sweep speedup)"];
+  }
+
+  builders -> circuit;
+  netlist  -> circuit [style=dashed label="ekspor/impor"];
+  circuit  -> mna;
+  mna -> seq; mna -> omp; mna -> ocl;
+  kern -> ocl [style=dashed];
+  seq -> result; omp -> result; ocl -> result;
+  result -> resid;
+  result -> csv [style=dashed];
+}
